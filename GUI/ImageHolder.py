@@ -97,9 +97,7 @@ class ImageViewer(QWidget):
         layout.addWidget(self.title)
         layout.addWidget(self.description)
         layout.addWidget(self.frame)
-        layout.addStretch(1)
         layout.addWidget(self.load_ctrl)
-        layout.addStretch(1)
         self.setLayout(layout)
 
 class ImageResult(QWidget):
@@ -142,9 +140,7 @@ class ImageResult(QWidget):
         layout.addWidget(self.title)
         layout.addWidget(self.description)
         layout.addWidget(self.frame)
-        layout.addStretch(1)
         layout.addWidget(self.process_btn)
-        layout.addStretch(1)
         self.setLayout(layout)
 
 if __name__ == '__main__':
