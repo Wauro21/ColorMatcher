@@ -125,7 +125,6 @@ class PortraitWidget(QLabel):
         self.update()
 
     def paintEvent(self, event):
-        print('paint event | roi {}'.format(self.roi_enabled))
         if not self.pix_map.isNull():
             painter = QPainter(self)
             painter.setRenderHint(QPainter.SmoothPixmapTransform)
