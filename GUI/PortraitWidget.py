@@ -121,11 +121,6 @@ class PortraitWidget(QLabel):
             # Check if there is an image
             if self.image is not None:
                 self.resizeFrame()
-
-                if(self.roi_enabled):
-                    self.image_resized = cv2.rectangle(self.image_resized, self.start, self.end, (255,0,0), 2)
-                    
-
                 self.pix_map = self.convert2Pixmap()
             painter.drawPixmap(0,0, self.width(), self.height(), self.pix_map)
 
@@ -170,6 +165,10 @@ class PortraitWidget(QLabel):
             nW = round(ar*nH)
         # Apply resizing with the possible dimensions
         resized_frame = cv2.resize(self.image, (nW, nH))
+
+        # Apply roi if present
+        if(self.start is not None and self.end is not None):
+            resized_frame = cv2.rectangle(resized_frame, self.start, self.end, (255,0,0), 2)
 
         # Generate final target size and fill with black color
         if(ch):
