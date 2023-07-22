@@ -5,7 +5,6 @@ from PySide2.QtCore import Signal, Slot, Qt
 import cv2
 import numpy as np
 
-import matplotlib.pyplot as plt
 
 
 
