@@ -1,4 +1,4 @@
-from GUI.ImageHolder import ImageResult, ImageViewer
+from GUI.ImageHolder import ImageViewer
 from PySide2.QtWidgets import QWidget, QHBoxLayout
 from PySide2.QtCore import Signal, Slot, Qt
 import numpy as np
@@ -22,12 +22,6 @@ class CentralWidget(QWidget):
                                             'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
                                             self
                                         )
-        
-        self.result_image = ImageResult(
-                                            'Resultado procesamiento',
-                                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-                                            self
-                                        )
 
         # init routines
 
@@ -38,6 +32,5 @@ class CentralWidget(QWidget):
         layout = QHBoxLayout()
         layout.addWidget(self.reference_image)
         layout.addWidget(self.process_image)
-        layout.addWidget(self.result_image)
-
+        
         self.setLayout(layout)

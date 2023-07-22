@@ -153,53 +153,11 @@ class ImageViewer(QWidget):
         layout = QVBoxLayout()
         layout.addWidget(self.title)
         layout.addWidget(self.description)
-        layout.addWidget(self.frame)
         layout.addWidget(self.load_ctrl)
+        layout.addWidget(self.frame)
         layout.addWidget(self.color_picker)
         self.setLayout(layout)
 
-class ImageResult(QWidget):
-    def __init__(self, title, desc, parent=None):
-        super().__init__(parent)
-
-        # Objects 
-        self.frame_path = None
-        self.pix_map = None
-
-        # Widgets
-        self.title = QLabel(title, self)
-        self.description = QLabel(desc, self)
-        self.frame = PortraitWidget(PORTRAIT_MIN_DIMS,self)
-        self.process_btn = QPushButton('Process')
-
-        # Init Routines
-        self.description.setWordWrap(True)
-
-        self.description.setAlignment(Qt.AlignCenter)
-
-        self.title.setStyleSheet(
-            '''
-            font-weight:bold;
-            font-size: 20px;
-            '''
-        )
-
-        self.description.setStyleSheet(
-            '''
-            font-size: 15px;
-            '''
-        )
-
-        # Signals and Slots
-        self.process_btn.clicked.connect(lambda: print('Process button'))
-
-        # Layout
-        layout = QVBoxLayout()
-        layout.addWidget(self.title)
-        layout.addWidget(self.description)
-        layout.addWidget(self.frame)
-        layout.addWidget(self.process_btn)
-        self.setLayout(layout)
 
 if __name__ == '__main__':
     app = QApplication([])
