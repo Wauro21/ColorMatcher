@@ -5,6 +5,8 @@ from PySide2.QtCore import Signal, Slot, Qt
 import cv2
 import numpy as np
 
+import matplotlib.pyplot as plt
+
 
 
 
@@ -39,6 +41,15 @@ class PortraitWidget(QLabel):
         self.mousePressEvent = self.pickROI
         self.mouseReleaseEvent = self.releaseROI
 
+    def getImageShape(self, image):
+        try: 
+            h, w, ch = image.shape
+        except:
+            h, w = image.shape
+            ch = None
+
+        return h, w, ch
+
 
     def enableROI(self):
         if(self.image is not None):
@@ -58,14 +69,8 @@ class PortraitWidget(QLabel):
 
             # Convert to original coordinates
             # -> Get conv factors
-            try: 
-                h, w, ch = self.image.shape
-                hp, wp, chp = self.image_resized.shape
-            except:
-                h, w = self.image.shape
-                ch = None
-                hp, wp = self.image_resized.shape
-                chp = None
+            h, w, ch = self.getImageShape(self.image)
+            hp, wp, chp = self.getImageShape(self.image_resized)
 
             conv_x = h/hp
             conv_y = w/wp
@@ -78,6 +83,8 @@ class PortraitWidget(QLabel):
             
             # Get roi
             selection = self.image[y_start:y_end, x_start:x_end]
+            plt.imshow(selection)
+            plt.show()
             self.roi.emit(selection)
 
     def pickROI(self, event):
@@ -143,11 +150,8 @@ class PortraitWidget(QLabel):
         self.setPixmap(self.convert2Pixmap())
 
     def resizeFrame(self):
-        try: 
-            h, w, ch = self.image.shape
-        except:
-            h, w = self.image.shape
-            ch = None
+        h, w, ch = self.getImageShape(self.image)
+
         # Get aspect ratio
         ar = w/h
 
