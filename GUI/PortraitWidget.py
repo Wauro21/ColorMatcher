@@ -52,11 +52,13 @@ class PortraitWidget(QLabel):
     def enableROI(self):
         if(self.image is not None):
             self.roi_enabled = True
+            self.setCursor(Qt.CrossCursor)
 
 
     def releaseROI(self, event):
         if(self.roi_enabled):
             self.roi_enabled = False
+            self.setCursor(Qt.ArrowCursor)
             
             # Unpack coordinates
 
