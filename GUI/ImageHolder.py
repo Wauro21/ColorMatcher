@@ -8,6 +8,60 @@ import cv2
 import numpy as np
 from GUI.PortraitWidget import PortraitWidget
 
+class ColorPicker(QWidget):
+
+    pick_roi = Signal()
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        # Objects
+         
+        #Widgets
+        self.pick_btn = QPushButton('Pick ROI', self)
+        self.color_label = QLabel(self)
+        self.color_name = QLabel('Color Value: #', self)
+
+       # init routines
+
+        # Slots and Signals
+        self.pick_btn.clicked.connect(self.askROI)
+
+        # Layout
+        layout = QHBoxLayout()
+        layout.addWidget(self.pick_btn)
+        layout.addWidget(self.color_label)
+        layout.addWidget(self.color_name)
+        layout.addStretch(1)
+        self.setLayout(layout)
+
+
+    def askROI(self):
+        self.pick_roi.emit()
+
+    def updateColorName(self, color_hex):
+        self.color_name.setText('Color Value: {}'.format(color_hex))
+
+
+    def processROI(self, roi):
+        avg_color = np.average(roi, axis=(0,1))
+        rounded_avg = np.around(avg_color)
+        # Falta color aca
+        color_pixmap = QPixmap(20,20)
+        
+        hex_color = self.rgb2hex(rounded_avg)
+        self.updateColorName(hex_color)
+        color_pixmap.fill(QColor(hex_color))
+        self.color_label.setPixmap(color_pixmap)
+
+    def rgb2hex(self, rgb):
+        r = int(rgb[0])
+        g = int(rgb[1])
+        b = int(rgb[2])
+
+        return '#{:02x}{:02x}{:02x}'.format(r,g,b)
+
+
 class ImageButtons(QWidget):
 
     loaded_path = Signal(str)
@@ -70,6 +124,7 @@ class ImageViewer(QWidget):
         self.description = QLabel(desc, self)
         self.frame = PortraitWidget(PORTRAIT_MIN_DIMS,self)
         self.load_ctrl = ImageButtons(self)
+        self.color_picker = ColorPicker(self)
 
         # Init Routines
         self.description.setWordWrap(True)
@@ -91,6 +146,8 @@ class ImageViewer(QWidget):
 
         # Signals and Slots
         self.load_ctrl.loaded_path.connect(self.frame.updateViewer)
+        self.color_picker.pick_roi.connect(self.frame.enableROI)
+        self.frame.roi.connect(self.color_picker.processROI)
 
         # Layout
         layout = QVBoxLayout()
@@ -98,6 +155,7 @@ class ImageViewer(QWidget):
         layout.addWidget(self.description)
         layout.addWidget(self.frame)
         layout.addWidget(self.load_ctrl)
+        layout.addWidget(self.color_picker)
         self.setLayout(layout)
 
 class ImageResult(QWidget):

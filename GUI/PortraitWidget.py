@@ -5,9 +5,13 @@ from PySide2.QtCore import Signal, Slot, Qt
 import cv2
 import numpy as np
 
+import matplotlib.pyplot as plt
+
 
 
 class PortraitWidget(QLabel):
+    roi = Signal(np.ndarray)
+
     def __init__(self, min_size, parent=None):
         super().__init__(parent)
 
@@ -16,6 +20,11 @@ class PortraitWidget(QLabel):
         self.image = None
         self.image_resized = None
         self.pix_map = QPixmap()
+        self.roi_enabled = False
+
+        # -> roi coordinates
+        self.start = None
+        self.end = None
 
         # init routine
         # -> Enable vertical grow
@@ -26,20 +35,93 @@ class PortraitWidget(QLabel):
         w, h = self.min_size
         self.setMinimumSize(w, h)
 
+        # -> Mouse position
+        self.setMouseTracking(True)
+        self.mousePressEvent = self.pickROI
+        self.mouseReleaseEvent = self.releaseROI
+
+
+    def enableROI(self):
+        if(self.image is not None):
+            self.roi_enabled = True
+
+
+    def releaseROI(self, event):
+        if(self.roi_enabled):
+            self.roi_enabled = False
+            
+            # Unpack coordinates
+
+            x_i = self.start[0]
+            y_i = self.start[1]
+            x_e = self.end[0]
+            y_e = self.end[1]
+
+            # Convert to original coordinates
+            # -> Get conv factors
+            try: 
+                h, w, ch = self.image.shape
+                hp, wp, chp = self.image_resized.shape
+            except:
+                h, w = self.image.shape
+                ch = None
+                hp, wp = self.image_resized.shape
+                chp = None
+
+            conv_x = h/hp
+            conv_y = w/wp
+
+            # -> coordinates in original image
+            x_start = round(x_i*conv_x)
+            x_end = round(x_e*conv_x)
+            y_start = round(y_i*conv_y)
+            y_end = round(y_e*conv_y)
+            
+            # Get roi
+            selection = self.image[y_start:y_end, x_start:x_end]
+            self.roi.emit(selection)
+
+    def pickROI(self, event):
+        if(self.roi_enabled):
+            x = event.pos().x()
+            y = event.pos().y()
+            self.start = [x, y]
+
+    def mouseMoveEvent(self, event):
+        if event.buttons() & Qt.LeftButton & self.roi_enabled:
+            x = event.pos().x()
+            y = event.pos().y()
+
+            # Check if inside limits
+            if(x > self.width()): x = self.width()
+            if(x < 0): x = 0
+            if(y > self.height()): y = self.height()
+            if(y < 0): y = 0
+
+            self.end = [x, y]
+
+            self.update()
+
+
     def setPixmap(self, pix):
         self.pix_map = pix
         self.update()
 
     def paintEvent(self, event):
+        print('paint event | roi {}'.format(self.roi_enabled))
         if not self.pix_map.isNull():
             painter = QPainter(self)
             painter.setRenderHint(QPainter.SmoothPixmapTransform)
             # Check if there is an image
             if self.image is not None:
                 self.resizeFrame()
+
+                if(self.roi_enabled):
+                    self.image_resized = cv2.rectangle(self.image_resized, self.start, self.end, (255,0,0), 2)
+                    
+
                 self.pix_map = self.convert2Pixmap()
             painter.drawPixmap(0,0, self.width(), self.height(), self.pix_map)
-            #painter.end()
 
     def initViewer(self):
         w, h = self.min_size
