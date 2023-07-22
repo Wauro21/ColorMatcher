@@ -62,10 +62,10 @@ class PortraitWidget(QLabel):
             
             # Unpack coordinates
 
-            x_i = self.start[0]
-            y_i = self.start[1]
-            x_e = self.end[0]
-            y_e = self.end[1]
+            x_i = min(self.start[0], self.end[0])
+            y_i = min(self.start[1], self.end[1])
+            x_e = max(self.start[0], self.end[0])
+            y_e = max(self.start[1], self.end[1])
 
             # Convert to original coordinates
             # -> Get conv factors
