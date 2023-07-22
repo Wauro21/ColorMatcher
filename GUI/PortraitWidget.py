@@ -19,10 +19,12 @@ class PortraitWidget(QLabel):
         # Objects 
         self.min_size = min_size
         self.image = None
+        self.image_rescaled = None
         self.image_resized = None
         self.pix_map = QPixmap()
         self.roi_enabled = False
-
+        self.offset = [0, 0]
+        
         # -> roi coordinates
         self.start = None
         self.end = None
@@ -70,10 +72,9 @@ class PortraitWidget(QLabel):
             # Convert to original coordinates
             # -> Get conv factors
             h, w, ch = self.getImageShape(self.image)
-            hp, wp, chp = self.getImageShape(self.image_resized)
 
-            conv_x = h/hp
-            conv_y = w/wp
+            conv_x = w
+            conv_y = h
 
             # -> coordinates in original image
             x_start = round(x_i*conv_x)
@@ -89,20 +90,36 @@ class PortraitWidget(QLabel):
 
     def pickROI(self, event):
         if(self.roi_enabled):
-            x = event.pos().x()
-            y = event.pos().y()
+
+            h, w, ch = self.getImageShape(self.image_rescaled)
+
+            mouse_x = event.pos().x() - self.offset[0]
+            mouse_y = event.pos().y() - self.offset[1]
+
+            if(mouse_x < 0): x = 0
+            elif(mouse_x > w): x = w
+            else: x = mouse_x/w
+            
+            if(mouse_y < 0): y = 0
+            elif(mouse_y > h): y = h
+            else: y = mouse_y/h
+            
             self.start = [x, y]
 
     def mouseMoveEvent(self, event):
         if event.buttons() & Qt.LeftButton & self.roi_enabled:
-            x = event.pos().x()
-            y = event.pos().y()
+            h, w, ch = self.getImageShape(self.image_rescaled)
 
-            # Check if inside limits
-            if(x > self.width()): x = self.width()
-            if(x < 0): x = 0
-            if(y > self.height()): y = self.height()
-            if(y < 0): y = 0
+            mouse_x = event.pos().x() - self.offset[0]
+            mouse_y = event.pos().y() - self.offset[1]
+
+            if(mouse_x < 0): x = 0
+            elif(mouse_x > w): x = w
+            else: x = mouse_x/w
+            
+            if(mouse_y < 0): y = 0
+            elif(mouse_y > h): y = h
+            else: y = mouse_y/h
 
             self.end = [x, y]
 
@@ -168,7 +185,10 @@ class PortraitWidget(QLabel):
 
         # Apply roi if present
         if(self.start is not None and self.end is not None):
-            resized_frame = cv2.rectangle(resized_frame, self.start, self.end, (255,0,0), 2)
+            start = [round(self.start[0]*nW), round(self.start[1]*nH)]
+            end = [round(self.end[0]*nW), round(self.end[1]*nH)]
+
+            resized_frame = cv2.rectangle(resized_frame, start, end, (255,0,0), 2)
 
         # Generate final target size and fill with black color
         if(ch):
@@ -178,6 +198,8 @@ class PortraitWidget(QLabel):
 
         # Position resized frame inside final frame
         aH, aW = (H-nH)//2, (W-nW)//2
+        self.offset = [aW, aH]
         f_frame[aH:aH+nH, aW:aW+nW] = resized_frame
 
+        self.image_rescaled = resized_frame
         self.image_resized = f_frame
