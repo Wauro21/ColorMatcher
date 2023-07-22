@@ -1,5 +1,6 @@
 from GUI.ImageHolder import ImageViewer
-from PySide2.QtWidgets import QWidget, QHBoxLayout
+from GUI.ResultWidget import ResultWidget
+from PySide2.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout
 from PySide2.QtCore import Signal, Slot, Qt
 import numpy as np
 
@@ -22,15 +23,26 @@ class CentralWidget(QWidget):
                                             'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
                                             self
                                         )
+        
+        self.result_widget = ResultWidget(self)
 
         # init routines
 
         # signals and slots
 
         # layout
-
         layout = QHBoxLayout()
+
+        # Frames layout
         layout.addWidget(self.reference_image)
         layout.addWidget(self.process_image)
+
+        # Result layout
+        result = QVBoxLayout()
+        result.addWidget(self.result_widget)
+        result.addStretch(1)
+
+
+        layout.addLayout(result)
         
         self.setLayout(layout)

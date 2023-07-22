@@ -18,11 +18,13 @@ class ColorPicker(QWidget):
         # Objects
          
         #Widgets
-        self.pick_btn = QPushButton('Pick ROI', self)
+        self.pick_btn = QPushButton('ROI', self)
         self.color_label = QLabel(self)
-        self.color_name = QLabel('Color Value: #', self)
+        self.color_name = QLabel('Color Value: #------', self)
+        self.color = []
 
-       # init routines
+        # init routines
+        self.initColorLabel()
 
         # Slots and Signals
         self.pick_btn.clicked.connect(self.askROI)
@@ -30,10 +32,27 @@ class ColorPicker(QWidget):
         # Layout
         layout = QHBoxLayout()
         layout.addWidget(self.pick_btn)
+        layout.addStretch(1)
         layout.addWidget(self.color_label)
         layout.addWidget(self.color_name)
-        layout.addStretch(1)
+        
         self.setLayout(layout)
+
+    def reset(self):
+
+        # Reset value
+        self.color = []
+
+        # Reset color label
+        self.initColorLabel()
+
+        # Reset text 
+        self.color_name.setText('Color Value: #------')
+
+    def initColorLabel(self):
+        pix = QPixmap('rsrcs/color_picker_icon.png')
+        pix = pix.scaled(20,20)
+        self.color_label.setPixmap(pix)
 
 
     def askROI(self):
@@ -46,6 +65,9 @@ class ColorPicker(QWidget):
     def processROI(self, roi):
         avg_color = np.average(roi, axis=(0,1))
         rounded_avg = np.around(avg_color)
+
+        self.color = rounded_avg
+
         # Falta color aca
         color_pixmap = QPixmap(20,20)
         
@@ -145,7 +167,7 @@ class ImageViewer(QWidget):
         )
 
         # Signals and Slots
-        self.load_ctrl.loaded_path.connect(self.frame.updateViewer)
+        self.load_ctrl.loaded_path.connect(self.loadedImg)
         self.color_picker.pick_roi.connect(self.frame.enableROI)
         self.frame.roi.connect(self.color_picker.processROI)
 
@@ -157,6 +179,11 @@ class ImageViewer(QWidget):
         layout.addWidget(self.frame)
         layout.addWidget(self.color_picker)
         self.setLayout(layout)
+
+    def loadedImg(self, path):
+        self.frame.updateViewer(path)
+        self.color_picker.reset()
+
 
 
 if __name__ == '__main__':
