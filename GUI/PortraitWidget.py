@@ -5,10 +5,6 @@ from PySide2.QtCore import Signal, Slot, Qt
 import cv2
 import numpy as np
 
-import matplotlib.pyplot as plt
-
-
-
 
 class PortraitWidget(QLabel):
     roi = Signal(np.ndarray)
@@ -18,16 +14,16 @@ class PortraitWidget(QLabel):
 
         # Objects 
         self.min_size = min_size
-        self.image = None
-        self.image_rescaled = None
-        self.image_resized = None
+        self.image = None # Original image
+        self.image_rescaled = None # Factible image with desired dims
+        self.image_resized = None  # Req image composited
         self.pix_map = QPixmap()
-        self.roi_enabled = False
-        self.offset = [0, 0]
         
-        # -> roi coordinates
+        # -> roi
+        self.roi_enabled = False
         self.start = None
         self.end = None
+        self.offset = [0, 0]
 
         # init routine
         # -> Enable vertical grow
@@ -84,8 +80,6 @@ class PortraitWidget(QLabel):
             
             # Get roi
             selection = self.image[y_start:y_end, x_start:x_end]
-            plt.imshow(selection)
-            plt.show()
             self.roi.emit(selection)
 
     def pickROI(self, event):
@@ -185,8 +179,15 @@ class PortraitWidget(QLabel):
 
         # Apply roi if present
         if(self.start is not None and self.end is not None):
-            start = [round(self.start[0]*nW), round(self.start[1]*nH)]
-            end = [round(self.end[0]*nW), round(self.end[1]*nH)]
+            start = [
+                round(self.start[0]*nW), 
+                round(self.start[1]*nH)
+            ]
+
+            end = [
+                round(self.end[0]*nW), 
+                round(self.end[1]*nH)
+            ]
 
             resized_frame = cv2.rectangle(resized_frame, start, end, (255,0,0), 2)
 
