@@ -17,7 +17,7 @@ PROCESS_IMAGE_TITLE = 'Imagen a Comparar'
 
 
 # -> MainWindow
-MAIN_WINDOW_TITLE = 'DeLorean Processing'
+MAIN_WINDOW_TITLE = 'Color Matcher'
 
 # -> Result Widget
 RESULT_WIDGET_TITLE = 'Resultado Análisis'

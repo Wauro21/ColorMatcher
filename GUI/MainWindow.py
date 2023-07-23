@@ -5,7 +5,7 @@ from PySide2.QtWidgets import QApplication, QMainWindow
 import sys
 import os
 
-class DeLoreanMain(QMainWindow):
+class ColorMatcherMain(QMainWindow):
     def __init__(self, parent=None):
 
         super().__init__(parent)
@@ -18,7 +18,7 @@ class DeLoreanMain(QMainWindow):
         # init routines
         self.setWindowTitle(MAIN_WINDOW_TITLE)
         self.setCentralWidget(self.DeLoreanWidget)
-        #self.setWindowIcon(QtGui.QIcon('rsrcs/icon.png'))
+        self.setWindowIcon(QtGui.QIcon('rsrcs/icon.png'))
 
         # signals and slots
 
@@ -30,6 +30,6 @@ if __name__ == '__main__':
     app = QApplication([])
     if os.name == 'nt':
         app.setStyle('Fusion')
-    window = DeLoreanMain()
+    window = ColorMatcherMain()
     window.show()
     sys.exit(app.exec_())
