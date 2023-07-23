@@ -1,5 +1,5 @@
-from GUI.Constants import IMAGE_FILE_FIELD_LABEL, IMAGE_HOLDER_MIME_TYPES, IMAGE_WINDOW_TITLE_FILEDIALOG, PORTRAIT_MIN_DIMS
-from PySide2.QtWidgets import QWidget, QLabel, QHBoxLayout, QApplication, QVBoxLayout, QPushButton, QLineEdit, QFileDialog, QSizePolicy
+from GUI.Constants import IMAGE_FILE_FIELD_LABEL, IMAGE_HOLDER_MIME_TYPES, IMAGE_WINDOW_TITLE_FILEDIALOG, PORTRAIT_MIN_DIMS, REFERENCE_IMAGE_TITLE
+from PySide2.QtWidgets import QWidget, QLabel, QHBoxLayout, QApplication, QVBoxLayout, QPushButton, QLineEdit, QFileDialog, QSizePolicy, QGroupBox
 from PySide2.QtGui import QPixmap, QColor, QPainter, QImage
 from PySide2.QtCore import Signal, Slot, Qt
 import sys
@@ -94,9 +94,9 @@ class ImageButtons(QWidget):
         # Objects 
 
         # Widgets
-        self.file_label = QLabel('File:',self)
+        self.file_label = QLabel('Archivo:',self)
         self.file_field = QLineEdit(IMAGE_FILE_FIELD_LABEL, self)
-        self.load_button = QPushButton('Load', self)
+        self.load_button = QPushButton('Cargar', self)
 
         # init routines
 
@@ -140,49 +140,61 @@ class ImageViewer(QWidget):
         # Objects 
         self.frame_path = None
         self.pix_map = None
+        self.roi_ready = False
 
         # Widgets
-        self.title = QLabel(title, self)
-        self.description = QLabel(desc, self)
+        self.group_box = QGroupBox(title, self)
         self.frame = PortraitWidget(PORTRAIT_MIN_DIMS,self)
         self.load_ctrl = ImageButtons(self)
         self.color_picker = ColorPicker(self)
 
         # Init Routines
-        self.description.setWordWrap(True)
 
-        self.description.setAlignment(Qt.AlignCenter)
-
-        self.title.setStyleSheet(
+        self.group_box.setStyleSheet(
             '''
-            font-weight:bold;
-            font-size: 20px;
-            '''
-        )
-
-        self.description.setStyleSheet(
-            '''
-            font-size: 15px;
+            QGroupBox { 
+                font-weight: bold;
+                font-size: 15px;
+            }
             '''
         )
 
         # Signals and Slots
         self.load_ctrl.loaded_path.connect(self.loadedImg)
         self.color_picker.pick_roi.connect(self.frame.enableROI)
-        self.frame.roi.connect(self.color_picker.processROI)
+        self.frame.roi.connect(self.receiveROI)
 
         # Layout
         layout = QVBoxLayout()
-        layout.addWidget(self.title)
-        layout.addWidget(self.description)
-        layout.addWidget(self.load_ctrl)
-        layout.addWidget(self.frame)
-        layout.addWidget(self.color_picker)
+
+        # Group layout
+        group = QVBoxLayout()
+        group.addWidget(self.load_ctrl)
+        group.addWidget(self.frame)
+        group.addWidget(self.color_picker)
+
+        self.group_box.setLayout(group)
+
+        layout.addWidget(self.group_box)
+
         self.setLayout(layout)
+
+    def receiveROI(self, roi):
+        self.color_picker.processROI(roi)
+        self.roi_ready = True
 
     def loadedImg(self, path):
         self.frame.updateViewer(path)
         self.color_picker.reset()
+        self.frame.resetROI()
+        self.roi_ready = False
+
+    def roiReady(self):
+        return self.roi_ready
+
+
+    def getColor(self):
+        return self.color_picker.color
 
 
 

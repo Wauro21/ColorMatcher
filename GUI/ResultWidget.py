@@ -1,10 +1,14 @@
+from GUI.Constants import RESULT_WIDGET_TITLE
 from PySide2 import QtGui
 from PySide2.QtWidgets import QApplication, QMainWindow, QGroupBox, QLabel, QFormLayout, QHBoxLayout, QPushButton, QVBoxLayout, QWidget
 import sys
 import os
+from PySide2.QtCore import Signal, Slot, Qt
 
 
 class ResultWidget(QWidget):
+
+    ask_process = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -14,7 +18,7 @@ class ResultWidget(QWidget):
         # Widgets
 
         self.process_results_btn = QPushButton('Procesar', self)
-        self.result_group = QGroupBox('Resultados Análisis',self)
+        self.result_group = QGroupBox(RESULT_WIDGET_TITLE,self)
         self.distance_red = QLabel('-', self)
         self.distance_green = QLabel('-', self)
         self.distance_blue = QLabel('-', self)
@@ -27,12 +31,16 @@ class ResultWidget(QWidget):
         # init routines
         self.result_group.setStyleSheet(
             '''
-            QGroupBox { font-weight: bold;}
+            QGroupBox { 
+                font-weight: bold;
+                font-size: 15px;
+            }
             '''
         )
 
 
         # signals and slots
+        self.process_results_btn.clicked.connect(self.askProcess)
 
         # layout
         layout = QVBoxLayout()
@@ -61,6 +69,23 @@ class ResultWidget(QWidget):
         layout.addWidget(self.process_results_btn)
         
         self.setLayout(layout)
+
+    def askProcess(self):
+        self.ask_process.emit()
+
+    def updateValues(self, channel_diffs, channel_diffs_percentage, avg_dist, avg_dist_percentage):
+        
+        # Update values
+        self.distance_red.setText('{:.1f}'.format(channel_diffs[0]))
+        self.distance_green.setText('{:.1f}'.format(channel_diffs[1]))
+        self.distance_blue.setText('{:.1f}'.format(channel_diffs[2]))
+        self.average_distance.setText('{:.1f}'.format(avg_dist))
+
+        # Update percentages
+        self.percentage_red.setText('{:.1f}'.format(channel_diffs_percentage[0]))
+        self.percentage_green.setText('{:.1f}'.format(channel_diffs_percentage[1]))
+        self.percentage_blue.setText('{:.1f}'.format(channel_diffs_percentage[2]))
+        self.percentage_distance.setText('{:.1f}'.format(avg_dist_percentage))
 
 if __name__ == '__main__':
 

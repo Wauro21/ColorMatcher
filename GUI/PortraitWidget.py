@@ -1,4 +1,4 @@
-from GUI.Constants import PORTRAIT_DEFAULT_BG_COLOR
+from GUI.Constants import PORTARIT_ROI_COLOR, PORTRAIT_DEFAULT_BG_COLOR
 from PySide2.QtWidgets import QLabel, QSizePolicy
 from PySide2.QtGui import QPixmap, QColor, QPainter, QImage
 from PySide2.QtCore import Signal, Slot, Qt
@@ -38,6 +38,11 @@ class PortraitWidget(QLabel):
         self.setMouseTracking(True)
         self.mousePressEvent = self.pickROI
         self.mouseReleaseEvent = self.releaseROI
+
+    def resetROI(self):
+        self.roi_enabled = False
+        self.start = None
+        self.end = None
 
     def getImageShape(self, image):
         try: 
@@ -190,7 +195,7 @@ class PortraitWidget(QLabel):
                 round(self.end[1]*nH)
             ]
 
-            resized_frame = cv2.rectangle(resized_frame, start, end, (255,0,0), 2)
+            resized_frame = cv2.rectangle(resized_frame, start, end, PORTARIT_ROI_COLOR, 2)
 
         # Generate final target size and fill with black color
         if(ch):
